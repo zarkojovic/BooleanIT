@@ -4,76 +4,47 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Models\Category;
 use App\Models\Product;
+use App\Services\ProductService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller {
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index() {
-        $products = Product::all()->load('category');
+    protected $productService;
+
+    public function __construct(ProductService $productService) {
+        $this->productService = $productService;
+    }
+
+    public function index(): JsonResponse {
+        $products = $this->productService->getAllProducts();
         return response()->json($products);
     }
 
-    /**
-     * Display a listing of the resource by category.
-     */
-    public function getByCategory(string $id) {
-        // Validate the category ID
-        if (!is_numeric($id)) {
-            return response()->json(['error' => 'Invalid category ID.'], 400);
+    public function getByCategory(string $id): JsonResponse {
+        $result = $this->productService->getProductsByCategory($id);
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
         }
 
-        // Check if the category exists
-        $category = Category::find($id);
-        if (!$category) {
-            return response()->json(['error' => 'Category not found.'], 404);
-        }
-
-        try {
-            // Fetch products by category ID
-            $products = Product::where("category_id", $id)->get();
-            return response()->json($products);
-        } catch (\Exception $e) {
-            // Handle potential database errors
-            return response()->json(['error' => 'An error occurred while fetching products.'], 500);
-        }
+        return response()->json($result['data'], $result['status']);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateProductRequest $request, string $id) {
-        $product = Product::find($id);
-        if (!$product) {
-            return response()->json(['error' => 'Product not found.'], 404);
-        }
-        $product->update($request->all());
+    public function update(UpdateProductRequest $request, string $id): JsonResponse {
+        $result = $this->productService->updateProduct($id, $request->all());
 
-        return response()->json($product);
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
+        }
+
+        return response()->json($result['data'], $result['status']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id) {
+    public function destroy(string $id): JsonResponse {
+        $result = $this->productService->deleteProduct($id);
 
-        $product = Product::find($id);
-
-        if (!$product) {
-            return response()->json(['error' => 'Product not found.'], 404);
-        }
-
-        try {
-            $product->delete();
-            return response()->json(['message' => 'Product deleted successfully.']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred while deleting the product.'], 500);
-        }
-
+        return response()->json(['message' => $result['message']], $result['status']);
     }
-
 }
