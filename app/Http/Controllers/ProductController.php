@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
@@ -22,8 +23,8 @@ class ProductController extends Controller {
         return response()->json($products);
     }
 
-    public function getByCategory(string $id): JsonResponse {
-        $result = $this->productService->getProductsByCategory($id);
+    public function getByCategory(Category $category): JsonResponse {
+        $result = $this->productService->getProductsByCategory($category);
 
         if (isset($result['error'])) {
             return response()->json(['error' => $result['error']], $result['status']);
@@ -32,8 +33,8 @@ class ProductController extends Controller {
         return response()->json($result['data'], $result['status']);
     }
 
-    public function update(UpdateProductRequest $request, string $id): JsonResponse {
-        $result = $this->productService->updateProduct($id, $request->all());
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse {
+        $result = $this->productService->updateProduct($product, $request->all());
 
         if (isset($result['error'])) {
             return response()->json(['error' => $result['error']], $result['status']);
@@ -42,8 +43,8 @@ class ProductController extends Controller {
         return response()->json($result['data'], $result['status']);
     }
 
-    public function destroy(string $id): JsonResponse {
-        $result = $this->productService->deleteProduct($id);
+    public function destroy(Product $product): JsonResponse {
+        $result = $this->productService->deleteProduct($product);
 
         return response()->json(['message' => $result['message']], $result['status']);
     }

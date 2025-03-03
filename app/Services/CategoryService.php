@@ -11,13 +11,7 @@ class CategoryService {
         return Category::all();
     }
 
-    public function updateCategory($id, $data) {
-        $category = Category::find($id);
-
-        if (!$category) {
-            return ['error' => 'Category not found.', 'status' => 404];
-        }
-
+    public function updateCategory(Category $category, $data) {
         $category->name = $data['name'];
 
         try {
@@ -28,13 +22,7 @@ class CategoryService {
         }
     }
 
-    public function deleteCategory($id) {
-        $category = Category::find($id);
-
-        if (!$category) {
-            return ['error' => 'Category not found.', 'status' => 404];
-        }
-
+    public function deleteCategory(Category $category) {
         if ($category->products->count() > 0) {
             return ['error' => 'Category cannot be deleted because it has products.', 'status' => 400];
         }
@@ -47,8 +35,7 @@ class CategoryService {
         }
     }
 
-    public function exportCategory($id) {
-        $category = Category::findOrFail($id);
+    public function exportCategory(Category $category) {
         $products = $category->products;
 
         $categoryName = preg_replace('/[^A-Za-z0-9]/', '_', $category->name);

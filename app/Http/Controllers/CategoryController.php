@@ -22,20 +22,20 @@ class CategoryController extends Controller {
         return response()->json($categories);
     }
 
-    public function update(UpdateCategoryRequest $request, string $id) : JsonResponse{
-        $result = $this->categoryService->updateCategory($id, $request->all());
+    public function update(UpdateCategoryRequest $request, Category $category): JsonResponse {
+        $result = $this->categoryService->updateCategory($category, $request->all());
 
         return response()->json(['message' => $result['message']], $result['status']);
     }
 
-    public function destroy(string $id) : JsonResponse{
-        $result = $this->categoryService->deleteCategory($id);
+    public function destroy(Category $category): JsonResponse {
+        $result = $this->categoryService->deleteCategory($category);
 
         return response()->json(['message' => $result['message']], $result['status']);
     }
 
-    public function export(string $id) {
-        return $this->categoryService->exportCategory($id);
+    public function export(Category $category) {
+        return $this->categoryService->exportCategory($category);
     }
 
 }
